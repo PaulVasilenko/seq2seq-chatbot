@@ -27,7 +27,7 @@ def initial_setup(data_corpus):
 
 
 if __name__ == "__main__":
-    data_corpus = "twitter"
+    data_corpus = "discordbot"
 
     #data preprocessing
     metadata, trainX, trainY, testX, testY, validX, validY = initial_setup(data_corpus)
@@ -94,13 +94,19 @@ if __name__ == "__main__":
     optimizer = tf.optimizers.Adam(learning_rate=0.001)
     model_.train()
 
-    seeds = ["happy birthday have a nice day",
-                 "donald trump won last nights presidential debate according to snap online polls"]
+    seeds = [
+        "happy birthday have a nice day",
+        "donald trump won last nights presidential debate according to snap online polls",
+        "придется применить дынную атаку",
+        "привет",
+        "как дела",
+        "арт дед"
+    ]
     for epoch in range(num_epochs):
         model_.train()
         trainX, trainY = shuffle(trainX, trainY, random_state=0)
         total_loss, n_iter = 0, 0
-        for X, Y in tqdm(tl.iterate.minibatches(inputs=trainX, targets=trainY, batch_size=batch_size, shuffle=False), 
+        for X, Y in tqdm(tl.iterate.minibatches(inputs=trainX, targets=trainY, batch_size=batch_size, shuffle=False),
                         total=n_step, desc='Epoch[{}/{}]'.format(epoch + 1, num_epochs), leave=False):
 
             X = tl.prepro.pad_sequences(X)
@@ -113,14 +119,14 @@ if __name__ == "__main__":
             with tf.GradientTape() as tape:
                 ## compute outputs
                 output = model_(inputs = [X, _decode_seqs])
-                
+
                 output = tf.reshape(output, [-1, vocabulary_size])
                 ## compute loss and update model
                 loss = cross_entropy_seq_with_mask(logits=output, target_seqs=_target_seqs, input_mask=_target_mask)
 
                 grad = tape.gradient(loss, model_.all_weights)
                 optimizer.apply_gradients(zip(grad, model_.all_weights))
-            
+
             total_loss += loss
             n_iter += 1
 
@@ -137,6 +143,6 @@ if __name__ == "__main__":
         tl.files.save_npz(model_.all_weights, name='model.npz')
 
 
-        
-    
-    
+
+
+
